@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Console\PermissionController;
+use App\Http\Controllers\Console\RoleController;
+use App\Http\Controllers\Console\UserController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RouteController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,25 +13,31 @@ use App\Http\Controllers\RouteController;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
 |
 */
 
-# ------ Unauthenticated routes ------ #
-Route::get('/', [AuthenticatedSessionController::class, 'create']);
-require __DIR__.'/auth.php';
+Route::get('/', function () {
+    return view('welcome');
+});
 
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
-# ------ Authenticated routes ------ #
-Route::middleware('auth')->group(function() {
-    Route::get('/dashboard', [RouteController::class, 'dashboard'])->name('home'); # dashboard
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-    Route::prefix('profile')->group(function(){
-        Route::get('/', [ProfileController::class, 'myProfile'])->name('profile');
-        Route::put('/change-ava', [ProfileController::class, 'changeFotoProfile'])->name('change-ava');
-        Route::put('/change-profile', [ProfileController::class, 'changeProfile'])->name('change-profile');
-    }); # profile group
+require __DIR__ . '/auth.php';
 
-    Route::resource('users', UserController::class);
+Route::prefix('console')->middleware(['auth', 'verified'])->group(function () {
+
+    Route::middleware('role:Administrator')->group(function () {
+        Route::resource('permissions', PermissionController::class);
+        Route::resource('roles', RoleController::class);
+        Route::patch('/users/profile/{id}', [UserController::class, 'updateDetail'])->name('users.profile.update');
+        Route::resource('users', UserController::class);
+    });
 });

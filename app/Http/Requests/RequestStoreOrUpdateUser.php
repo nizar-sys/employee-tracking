@@ -38,24 +38,4 @@ class RequestStoreOrUpdateUser extends FormRequest
 
         return $rules;
     }
-
-    public function messages()
-    {
-        return [
-            'name.required' => 'Kolom nama harus diisi.',
-            'name.max' => 'Nama tidak boleh lebih dari 255 karakter.',
-            'email.required' => 'Kolom email harus diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah digunakan.',
-            'password.required' => 'Kolom password harus diisi.',
-            'password.min' => 'Password minimal 6 karakter.',
-            'role.required' => 'Kolom role harus diisi.',
-            'role.in' => 'Role tidak valid.',
-            'avatar.image' => 'File harus berupa gambar.',
-            'avatar.mimes' => 'Format gambar tidak valid.',
-            'avatar.max' => 'Gambar tidak boleh lebih dari 2MB.',
-            'confirmation_password.required' => 'Kolom konfirmasi password harus diisi.',
-            'confirmation_password.same' => 'Konfirmasi password tidak sama.',
-        ];
-    }
 }

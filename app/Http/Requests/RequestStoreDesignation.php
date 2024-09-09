@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RequestStoreRole extends FormRequest
+class RequestStoreDesignation extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,20 +23,7 @@ class RequestStoreRole extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-        ];
-    }
-
-    /**
-     * Get the validation messages that apply to the request.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'The role name is required.',
-            'name.string' => 'The role name must be a string.',
-            'name.max' => 'The role name may not be greater than :max characters.',
+            'description' => 'nullable|string',
         ];
     }
 }

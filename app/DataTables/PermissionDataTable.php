@@ -77,7 +77,7 @@ class PermissionDataTable extends DataTable
             ],
             [
                 'text' => '<i class="ri-refresh-line me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Reload</span>',
-                'className' => 'btn btn-secondary mb-5 mb-md-0 waves-effect waves-light',
+                'className' => 'btn btn-secondary mb-5 mb-md-0 me-3 waves-effect waves-light',
                 'action' => 'function (e, dt, node, config) {
                     dt.ajax.reload();
                     $("#permission-table_filter input").val("").keyup();

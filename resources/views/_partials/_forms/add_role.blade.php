@@ -7,7 +7,7 @@
             <label for="name">Role Name</label>
         </div>
     </div>
-    <div class="col-12">
+    <div class="col-12 d-none">
         <h5 class="mb-6">Role Permissions</h5>
         <!-- Permission table -->
         <div class="table-responsive">

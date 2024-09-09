@@ -54,7 +54,8 @@
         href="{{ asset('/materialize') }}/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
     <link rel="stylesheet"
         href="{{ asset('/materialize') }}/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
-    <link rel="stylesheet" href="{{ asset('/materialize') }}/assets/vendor/libs/@form-validation/form-validation.css" />
+    <link rel="stylesheet"
+        href="{{ asset('/materialize') }}/assets/vendor/libs/@form-validation/form-validation.css" />
     <link rel="stylesheet" href="{{ asset('/materialize') }}/assets/vendor/libs/toastr/toastr.css" />
     <link rel="stylesheet" href="{{ asset('/materialize') }}/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 
@@ -68,6 +69,12 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('/materialize') }}/assets/js/config.js"></script>
 
+    <link rel="stylesheet" href="{{ asset('/assets/plugins/summernote/summernote-bs4.css') }}">
+    <link rel="stylesheet" href="{{ asset('/materialize') }}/assets/vendor/libs/dropzone/dropzone.css" />
+    <link rel="stylesheet" href="{{ asset('/materialize') }}/assets/vendor/libs/select2/select2.css" />
+
+    @vite('resources/css/custom_dropzone.css')
+
     @stack('styles')
 </head>
 
@@ -78,7 +85,7 @@
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand demo">
-                    <a href="{{ url('/dashboard') }}" class="app-brand-link">
+                    <a href="{{ Auth::user()->hasRole('Student') ? route('student.dashboard') : route('dashboard') }}" class="app-brand-link">
                         <span class="app-brand-logo demo">
                             <span style="color: var(--bs-primary)">
                                 <svg width="268" height="150" viewBox="0 0 38 20" fill="none"
@@ -186,7 +193,7 @@
                                                 <div class="flex-grow-1">
                                                     <span
                                                         class="fw-medium d-block small">{{ $user ? $user->name : 'John Doe' }}</span>
-                                                    <small class="text-muted">Admin</small>
+                                                    <small class="text-muted">{{ $user ? $user->roles?->first()?->name : 'Alonami' }}</small>
                                                 </div>
                                             </div>
                                         </a>
@@ -295,6 +302,7 @@
     <script>
         var urlRoot = '{{ url('/') }}';
         var urlSearch = urlRoot + "/api/search?user_id=" + '{{ Auth::id() }}';
+        var assetUrl = '{{ asset('/') }}';
     </script>
     @vite(['resources/js/main.js', 'resources/js/search/script.js', 'resources/js/app-logistics-dashboard.js'])
 
@@ -314,7 +322,43 @@
             toastr.warning('{{ session('warning') }}', 'Warning!') @endif
     </script>
 
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css"
+        integrity="sha512-ngQ4IGzHQ3s/Hh8kMyG4FC74wzitukRMIcTOoKT3EyzFZCILOPF0twiXOQn75eDINUfKBYmzYn2AA8DkAk8veQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="{{ asset('/assets/plugins/summernote/summernote-bs4.js') }}"></script>
+    <script src="{{ asset('/materialize') }}/assets/vendor/libs/dropzone/dropzone.js"></script>
+    <script src="{{ asset('/materialize') }}/assets/vendor/libs/select2/select2.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (document.querySelector('.full-editor')) {
+                $('.full-editor').summernote();
+            }
+
+            const select2Elements = $('.select2');
+
+            if (select2Elements.length) {
+                select2Elements.each(function() {
+                    const $this = $(this);
+                    const placeholder = $this.attr('data-placeholder') ?
+                        $this.attr('data-placeholder').replace(/_/g, ' ') :
+                        'Select an option';
+
+                    select2Focus($this);
+
+                    $this.wrap('<div class="position-relative"></div>').select2({
+                        placeholder,
+                        dropdownParent: $this.parent()
+                    });
+                });
+            }
+
+        });
+    </script>
+
+    @vite('resources/js/custom_dropzone.js')
     @stack('scripts')
-</body>
+    </body>
 
 </html>

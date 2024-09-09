@@ -94,3 +94,27 @@ if (!function_exists('passwordPlainText')) {
         return '&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;';
     }
 }
+
+if (!function_exists('responseJson')) {
+    function responseJson($data = [], $message = 'Success', $status = 200)
+    {
+        return response()->json([
+            'success' => true,
+            'status' => $status,
+            'message' => $message,
+            'data' => $data,
+        ], $status);
+    }
+}
+
+if (!function_exists('responseJsonError')) {
+    function responseJsonError($errors = [], $message = 'Error occurred', $status = 400)
+    {
+        return response()->json([
+            'success' => false,
+            'status' => $status,
+            'message' => $message,
+            'errors' => $errors,
+        ], $status);
+    }
+}

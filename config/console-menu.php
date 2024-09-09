@@ -16,22 +16,11 @@ $menuItems = [
         'header' => 'User Managements',
         'items' => [
             [
-                'title' => 'Roles & Permissions',
-                'icon' => 'ri-lock-2-line',
-                'route' => '',
-                'active' => ['permissions.*', 'roles.*'],
-                'submenu' => [
-                    [
-                        'title' => 'Permission',
-                        'route' => 'permissions.index',
-                        'active' => 'permissions.*'
-                    ],
-                    [
-                        'title' => 'Roles',
-                        'route' => 'roles.index',
-                        'active' => 'roles.*'
-                    ]
-                ]
+                'title' => 'Roles',
+                'icon' => 'ri-shield-user-line',
+                'route' => 'roles.index',
+                'active' => 'roles.*',
+                'submenu' => []
             ],
             [
                 'title' => 'Users',
@@ -40,6 +29,25 @@ $menuItems = [
                 'active' => 'users.*',
                 'submenu' => []
             ]
+        ]
+    ],
+    [
+        'header' => 'Master Data',
+        'items' => [
+            [
+                'title' => 'Designations',
+                'icon' => 'ri-file-list-3-line',
+                'route' => 'designations.index',
+                'active' => 'designations.*',
+                'submenu' => []
+            ],
+            [
+                'title' => 'Employees',
+                'icon' => 'ri-user-3-line',
+                'route' => 'employees.index',
+                'active' => 'employees.*',
+                'submenu' => []
+            ],
         ]
     ],
     [

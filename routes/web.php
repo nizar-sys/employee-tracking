@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Console\PermissionController;
+use App\Http\Controllers\Console\DesignationController;
+use App\Http\Controllers\Console\EmployeeController;
 use App\Http\Controllers\Console\RoleController;
 use App\Http\Controllers\Console\UserController;
 use App\Http\Controllers\DashboardController;
@@ -35,9 +36,11 @@ require __DIR__ . '/auth.php';
 Route::prefix('console')->middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:Administrator')->group(function () {
-        Route::resource('permissions', PermissionController::class);
         Route::resource('roles', RoleController::class);
         Route::patch('/users/profile/{id}', [UserController::class, 'updateDetail'])->name('users.profile.update');
         Route::resource('users', UserController::class);
+
+        Route::resource('designations', DesignationController::class);
+        Route::resource('employees', EmployeeController::class);
     });
 });

@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\AuthenticatedSessionController;
 use App\Http\Controllers\Api\DesignationController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -36,4 +38,6 @@ Route::middleware('auth:sanctum')->name('api.')->group(function () {
         Route::resource('employees', EmployeeController::class);
     });
 
+    Route::resource('leaves', LeaveController::class)->parameter('leaves', 'leave');
+    Route::resource('attendances', AttendanceController::class);
 });

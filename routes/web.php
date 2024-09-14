@@ -5,6 +5,8 @@ use App\Http\Controllers\Console\EmployeeController;
 use App\Http\Controllers\Console\RoleController;
 use App\Http\Controllers\Console\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Hr\AttendanceController;
+use App\Http\Controllers\Hr\LeaveController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,4 +45,7 @@ Route::prefix('console')->middleware(['auth', 'verified'])->group(function () {
         Route::resource('designations', DesignationController::class);
         Route::resource('employees', EmployeeController::class);
     });
+
+    Route::resource('leaves', LeaveController::class)->parameter('leaves', 'leave');
+    Route::resource('attendances', AttendanceController::class);
 });

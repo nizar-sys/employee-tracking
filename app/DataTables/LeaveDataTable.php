@@ -2,14 +2,16 @@
 
 namespace App\DataTables;
 
-use App\Models\Designation;
+use App\Enums\LeaveStatus;
+use App\Models\Leave;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Services\DataTable;
 
-class DesignationDataTable extends DataTable
+class LeaveDataTable extends DataTable
 {
     /**
      * Build the DataTable class.
@@ -20,22 +22,38 @@ class DesignationDataTable extends DataTable
     {
         return (new EloquentDataTable($query))
             ->addIndexColumn()
-            ->addColumn('action', 'console.designations.action')
-            ->editColumn('updated_at', function ($designations) {
-                return $designations->updated_at->format('d F Y H:i');
+            ->addColumn('action', 'console.leaves.action')
+            ->editColumn('reason', function (Leave $leave) {
+                return str($leave->reason)->limit(50);
             })
-            ->editColumn('description', function ($designations) {
-                return str($designations->description)->limit(50);
+            ->editColumn('status', function (Leave $leave) {
+                $status = match ($leave->status) {
+                    LeaveStatus::Pending => 'warning',
+                    LeaveStatus::Approved => 'success',
+                    LeaveStatus::Rejected => 'danger',
+                    default => 'secondary',
+                };
+
+                return '<span class="badge rounded-pill bg-label-' . $status . '">' . ucfirst($leave->status) . '</span>';
             })
-            ->rawColumns(['action', 'description']);
+            ->addColumn('date', function (Leave $leave) {
+                return Carbon::parse($leave->start_date)->format('d M Y') . ' - ' . Carbon::parse($leave->end_date)->format('d M Y');
+            })
+            ->editColumn('document', function (Leave $leave) {
+                return $leave->document ? '<a download href="' . asset($leave->document) . '" target="_blank" class="text-decoration-none badge rounded-pill bg-label-primary">Download</a>' : '-';
+            })
+            ->editColumn('leave_type', function (Leave $leave) {
+                return ucfirst($leave->leave_type);
+            })
+            ->rawColumns(['action', 'status', 'document']);
     }
 
     /**
      * Get the query source of dataTable.
      */
-    public function query(Designation $model): QueryBuilder
+    public function query(Leave $model): QueryBuilder
     {
-        return $model->newQuery();
+        return $model->newQuery()->with(['employee:id,user_id,number', 'employee.user:id,name']);
     }
 
     /**
@@ -57,7 +75,7 @@ class DesignationDataTable extends DataTable
         $language = [
             'sLengthMenu' => 'Show _MENU_',
             'search' => '',
-            'searchPlaceholder' => 'Search Designations',
+            'searchPlaceholder' => 'Search Leaves',
             'paginate' => [
                 'next' => '<i class="ri-arrow-right-s-line"></i>',
                 'previous' => '<i class="ri-arrow-left-s-line"></i>'
@@ -67,13 +85,13 @@ class DesignationDataTable extends DataTable
         // Konfigurasi tombol
         $buttons = [
             [
-                'text' => '<i class="ri-add-line me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Designation</span>',
+                'text' => '<i class="ri-add-line me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">New Leave</span>',
                 'className' => 'add-new btn btn-primary mb-5 mb-md-0 me-3 waves-effect waves-light',
                 'init' => 'function (api, node, config) {
                     $(node).removeClass("btn-secondary");
                 }',
                 'action' => 'function (e, dt, node, config) {
-                    window.location = "' . route('designations.create') . '";
+                    window.location = "' . route('leaves.create') . '";
                 }'
             ],
             [
@@ -81,12 +99,14 @@ class DesignationDataTable extends DataTable
                 'className' => 'btn btn-secondary mb-5 mb-md-0 me-3 waves-effect waves-light',
                 'action' => 'function (e, dt, node, config) {
                     dt.ajax.reload();
-                    $("#designations-table_filter input").val("").keyup();
+                    $("#leaves-table_filter input").val("").keyup();
+                    $("#leave_type_filter").val("").trigger("change");
+                    $("#leave_status_filter").val("").trigger("change");
                 }'
             ]
         ];
 
-        $columnExport = [0, 1, 2, 3];
+        $columnExport = [0, 1, 2, 3, 4, 5, 7];
         $buttons[] = [
             [
                 'extend' => 'collection',
@@ -131,7 +151,7 @@ class DesignationDataTable extends DataTable
         ];
 
         return $this->builder()
-            ->setTableId('designations-table')
+            ->setTableId('leaves-table')
             ->columns($this->getColumns())
             ->parameters([
                 'order' => [[0, 'desc']], // Urutan default
@@ -142,9 +162,12 @@ class DesignationDataTable extends DataTable
                 'autoWidth' => false, // AutoWidth
             ])
             ->ajax([
-                'url'  => route('designations.index'),
+                'url'  => route('leaves.index'),
                 'type' => 'GET',
                 'data' => "function(d){
+                    d.employee_id = $('#employee_id_filter').val();
+                    d.leave_type = $('#leave_type_filter').val();
+                    d.status = $('#leave_status_filter').val();
                 }",
             ]);
     }
@@ -156,10 +179,15 @@ class DesignationDataTable extends DataTable
     {
         return [
             Column::make('DT_RowIndex')->title('#')->orderable(false)->searchable(false),
-            Column::make('name'),
-            Column::make('description'),
-            Column::make('updated_at')->title('Last Updated')
+            Column::make('employee.number')->title('Employee Number'),
+            Column::make('employee.user.name')->title('Employee Name'),
+            Column::make('leave_type')->title('Type'),
+            Column::make('date')->title('Date')
+                ->orderable(false)
                 ->searchable(false),
+            Column::make('reason')->title('Reason'),
+            Column::make('document')->title('Document'),
+            Column::make('status')->title('Status'),
             Column::computed('action')
                 ->exportable(false)
                 ->printable(false)
@@ -174,6 +202,6 @@ class DesignationDataTable extends DataTable
      */
     protected function filename(): string
     {
-        return 'Designation_' . date('YmdHis');
+        return 'Leave_' . date('YmdHis');
     }
 }

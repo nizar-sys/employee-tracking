@@ -2,14 +2,15 @@
 
 namespace App\DataTables;
 
-use App\Models\Designation;
+use App\Enums\AttendanceStatus;
+use App\Models\Attendance;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Services\DataTable;
 
-class DesignationDataTable extends DataTable
+class AttendanceDataTable extends DataTable
 {
     /**
      * Build the DataTable class.
@@ -20,22 +21,29 @@ class DesignationDataTable extends DataTable
     {
         return (new EloquentDataTable($query))
             ->addIndexColumn()
-            ->addColumn('action', 'console.designations.action')
-            ->editColumn('updated_at', function ($designations) {
-                return $designations->updated_at->format('d F Y H:i');
+            ->addColumn('action', 'console.attendances.action')
+            ->editColumn('status', function ($attendance) {
+                $status = match ($attendance->status) {
+                    AttendanceStatus::Present => 'bg-label-success',
+                    AttendanceStatus::Absent => 'bg-label-danger',
+                    AttendanceStatus::Late => 'bg-label-warning',
+                    AttendanceStatus::OnLeave => 'bg-label-info',
+                    AttendanceStatus::DayOff => 'bg-label-secondary',
+                    AttendanceStatus::Holiday => 'bg-label-primary',
+                    default => 'bg-label-primary',
+                };
+
+                return "<span class='badge rounded-pill $status'>".str($attendance->status)->title()."</span>";
             })
-            ->editColumn('description', function ($designations) {
-                return str($designations->description)->limit(50);
-            })
-            ->rawColumns(['action', 'description']);
+            ->rawColumns(['action', 'status']);
     }
 
     /**
      * Get the query source of dataTable.
      */
-    public function query(Designation $model): QueryBuilder
+    public function query(Attendance $model): QueryBuilder
     {
-        return $model->newQuery();
+        return $model->newQuery()->with(['employee:id,user_id,number', 'employee.user:id,name']);
     }
 
     /**
@@ -57,7 +65,7 @@ class DesignationDataTable extends DataTable
         $language = [
             'sLengthMenu' => 'Show _MENU_',
             'search' => '',
-            'searchPlaceholder' => 'Search Designations',
+            'searchPlaceholder' => 'Search Attendances',
             'paginate' => [
                 'next' => '<i class="ri-arrow-right-s-line"></i>',
                 'previous' => '<i class="ri-arrow-left-s-line"></i>'
@@ -67,13 +75,13 @@ class DesignationDataTable extends DataTable
         // Konfigurasi tombol
         $buttons = [
             [
-                'text' => '<i class="ri-add-line me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Designation</span>',
+                'text' => '<i class="ri-add-line me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">New Attendance</span>',
                 'className' => 'add-new btn btn-primary mb-5 mb-md-0 me-3 waves-effect waves-light',
                 'init' => 'function (api, node, config) {
                     $(node).removeClass("btn-secondary");
                 }',
                 'action' => 'function (e, dt, node, config) {
-                    window.location = "' . route('designations.create') . '";
+                    window.location = "' . route('attendances.create') . '";
                 }'
             ],
             [
@@ -81,12 +89,12 @@ class DesignationDataTable extends DataTable
                 'className' => 'btn btn-secondary mb-5 mb-md-0 me-3 waves-effect waves-light',
                 'action' => 'function (e, dt, node, config) {
                     dt.ajax.reload();
-                    $("#designations-table_filter input").val("").keyup();
+                    $("#attendances-table_filter input").val("").keyup();
                 }'
             ]
         ];
 
-        $columnExport = [0, 1, 2, 3];
+        $columnExport = [0, 1, 2, 3, 4, 5, 6];
         $buttons[] = [
             [
                 'extend' => 'collection',
@@ -131,7 +139,7 @@ class DesignationDataTable extends DataTable
         ];
 
         return $this->builder()
-            ->setTableId('designations-table')
+            ->setTableId('attendances-table')
             ->columns($this->getColumns())
             ->parameters([
                 'order' => [[0, 'desc']], // Urutan default
@@ -142,9 +150,11 @@ class DesignationDataTable extends DataTable
                 'autoWidth' => false, // AutoWidth
             ])
             ->ajax([
-                'url'  => route('designations.index'),
+                'url'  => route('attendances.index'),
                 'type' => 'GET',
                 'data' => "function(d){
+                    d.employee_id = $('#employee_id_filter').val();
+                    d.status = $('#status_filter').val();
                 }",
             ]);
     }
@@ -156,10 +166,12 @@ class DesignationDataTable extends DataTable
     {
         return [
             Column::make('DT_RowIndex')->title('#')->orderable(false)->searchable(false),
-            Column::make('name'),
-            Column::make('description'),
-            Column::make('updated_at')->title('Last Updated')
-                ->searchable(false),
+            Column::make('employee.number')->title('Employee Number'),
+            Column::make('employee.user.name')->title('Employee Name'),
+            Column::make('date')->title('Date'),
+            Column::make('check_in')->title('Clock In'),
+            Column::make('check_out')->title('Clock Out'),
+            Column::make('status')->title('Status'),
             Column::computed('action')
                 ->exportable(false)
                 ->printable(false)
@@ -174,6 +186,6 @@ class DesignationDataTable extends DataTable
      */
     protected function filename(): string
     {
-        return 'Designation_' . date('YmdHis');
+        return 'Attendance_' . date('YmdHis');
     }
 }

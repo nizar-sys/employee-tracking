@@ -51,6 +51,25 @@ $menuItems = [
         ]
     ],
     [
+        'header' => 'HR Management',
+        'items' => [
+            [
+                'title' => 'Leaves',
+                'icon' => 'ri-file-list-3-line',
+                'route' => 'leaves.index',
+                'active' => 'leaves.*',
+                'submenu' => []
+            ],
+            [
+                'title' => 'Attendance',
+                'icon' => 'ri-user-3-line',
+                'route' => 'attendances.index',
+                'active' => 'attendances.*',
+                'submenu' => []
+            ],
+        ]
+    ],
+    [
         'header' => 'Settings',
         'items' => [
             [

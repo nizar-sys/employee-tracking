@@ -254,7 +254,7 @@
                                         document.write(new Date().getFullYear());
                                     </script>
                                     , made with <span class="text-danger"><i
-                                            class="tf-icons ri-heart-fill"></i></span>
+                                            class="tf-icons ri-heart-fill"></i> Codeplatery</span>
                                 </div>
                             </div>
                         </div>

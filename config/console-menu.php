@@ -70,6 +70,25 @@ $menuItems = [
         ]
     ],
     [
+        'header' => 'Tasks Managements',
+        'items' => [
+            [
+                'title' => 'Tasks',
+                'icon' => 'ri-file-list-3-line',
+                'route' => 'tasks.index',
+                'active' => 'tasks.*',
+                'submenu' => []
+            ],
+            [
+                'title' => 'Task Reports',
+                'icon' => 'ri-user-3-line',
+                'route' => 'task-reports.index',
+                'active' => 'task-reports.*',
+                'submenu' => []
+            ],
+        ]
+    ],
+    [
         'header' => 'Settings',
         'items' => [
             [

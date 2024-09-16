@@ -8,6 +8,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Hr\AttendanceController;
 use App\Http\Controllers\Hr\LeaveController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Task\TaskController;
+use App\Http\Controllers\Task\TaskReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,12 +40,16 @@ require __DIR__ . '/auth.php';
 Route::prefix('console')->middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:Administrator')->group(function () {
+        Route::get('/tasks/{task}/employees', [TaskReportController::class, 'getEmployeesByTask'])->name('task.employees.get');
         Route::resource('roles', RoleController::class);
         Route::patch('/users/profile/{id}', [UserController::class, 'updateDetail'])->name('users.profile.update');
         Route::resource('users', UserController::class);
 
         Route::resource('designations', DesignationController::class);
         Route::resource('employees', EmployeeController::class);
+
+        Route::resource('tasks', TaskController::class);
+        Route::resource('task-reports', TaskReportController::class)->parameter('task-reports', 'taskReport');
     });
 
     Route::resource('leaves', LeaveController::class)->parameter('leaves', 'leave');

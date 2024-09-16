@@ -18,8 +18,8 @@ class EmployeeController extends Controller
         $designations = Designation::select('id', 'name')->get();
 
         return $dataTable
-        ->addScope(new EmployeeScope($request))
-        ->render('console.employees.index', compact('designations'));
+            ->addScope(new EmployeeScope($request))
+            ->render('console.employees.index', compact('designations'));
     }
 
     public function create()
@@ -40,6 +40,7 @@ class EmployeeController extends Controller
             Employee::create($payloadEmployee);
             return redirect()->route('employees.index')->with('success', 'Employee created successfully.');
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return back()->withInput()->with('error', 'Failed to create employee.');
         }
     }

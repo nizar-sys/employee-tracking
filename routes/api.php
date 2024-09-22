@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\DesignationController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\Task\TaskController;
+use App\Http\Controllers\Api\Task\TaskReportController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -40,4 +42,6 @@ Route::middleware('auth:sanctum')->name('api.')->group(function () {
 
     Route::resource('leaves', LeaveController::class)->parameter('leaves', 'leave');
     Route::resource('attendances', AttendanceController::class);
+    Route::resource('tasks', TaskController::class);
+    Route::resource('task-reports', TaskReportController::class);
 });

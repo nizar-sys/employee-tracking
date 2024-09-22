@@ -59,6 +59,14 @@ class TaskReportController extends Controller
     public function store(RequestStoreTaskReport $request)
     {
         try {
+            $existingReport = TaskReport::where('task_id', $request->task_id)
+                ->where('status', '!=', 'revision')
+                ->first();
+
+            if ($existingReport) {
+                return redirect()->back()->with('error', 'Task has already been reported and cannot be reported again unless its under revision.');
+            }
+
             $data = [
                 'task_id' => $request->task_id,
                 'status' => $request->status,
@@ -71,12 +79,12 @@ class TaskReportController extends Controller
 
             TaskReport::create($data);
 
+
             return redirect(route('task-reports.index'))->with('success', 'Task report submitted successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to submit task report.');
         }
     }
-
 
     /**
      * Display the specified resource.
